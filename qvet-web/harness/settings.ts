@@ -12,4 +12,9 @@ export const settings = {
   firstPageMs: params.get("first") ? Number(params.get("first")) : null,
   // 0 disables; otherwise that page returns a 500
   failPage: num("fail", 0),
+  // Blank serves no qvet.yml; info or embargo serves one with a notice of
+  // that level that is always active, to see what the headline does with it.
+  notice: params.get("notice") ?? "",
+  // Every commit has passed QA, so the release is otherwise ready to deploy.
+  allQa: params.get("qa") === "all",
 };

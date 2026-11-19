@@ -41,7 +41,28 @@ function commit(index: number) {
 
 // Every third commit has passed QA, so the table shows a mix. Only the tail of
 // the sha is parsed, as the whole of it overflows a double.
-const hasPassedQa = (sha: string) => parseInt(sha.slice(-6), 16) % 3 === 0;
+const hasPassedQa = (sha: string) =>
+  settings.allQa || parseInt(sha.slice(-6), 16) % 3 === 0;
+
+// A qvet.yml with one always-active notice at the requested level, so the
+// headline can be seen holding (embargo) or not holding (info) the release.
+const configFile = (level: string) => `
+action:
+  ready:
+    - type: link
+      name: "Deploy to production"
+      url: "https://example.com/deploy"
+notices:
+  - title: "Release freeze (level: ${level})"
+    text: "A notice at level ${level}, served by the harness."
+    url: "https://example.com/release-freeze-policy"
+    severity: ${level === "embargo" ? "error" : "warning"}
+    level: ${level}
+    schedule:
+      start: "2000-01-03T00:00:00Z"
+      duration: "P52W"
+      repeat_every: "P52W"
+`;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export const requestLog: Array<string> = [];
@@ -114,7 +135,10 @@ export async function fakeFetch(input: RequestInfo | URL): Promise<Response> {
     return json(200, { total_count: 0, check_runs: [] });
   }
   if (path.includes("/contents/")) {
-    return json(404, { message: "Not Found" });
+    if (settings.notice === "") {
+      return json(404, { message: "Not Found" });
+    }
+    return json(200, { content: window.btoa(configFile(settings.notice)) });
   }
   if (path.includes("/branches/")) {
     return json(200, { commit: { sha: HEAD_SHA } });

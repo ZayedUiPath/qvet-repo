@@ -58,6 +58,23 @@ function Controls() {
           />
         </label>
         {field("fail", "fail page (0=off)", settings.failPage)}
+        <label style={{ marginRight: 12 }}>
+          notice{" "}
+          <select name="notice" defaultValue={settings.notice}>
+            <option value="">none</option>
+            <option value="info">info</option>
+            <option value="embargo">embargo</option>
+          </select>
+        </label>
+        <label style={{ marginRight: 12 }}>
+          <input
+            type="checkbox"
+            name="qa"
+            value="all"
+            defaultChecked={settings.allQa}
+          />{" "}
+          all QA'd
+        </label>
         <button type="submit">Reload</button>
       </form>
       <div style={{ marginTop: 8 }}>
